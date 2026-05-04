@@ -21,6 +21,15 @@ DEFAULT_ENTITY = {
     "de_rating": 70
 }
 
+def normalize_pipeapi_item(item):
+    if isinstance(item, list) and len(item) > 0:
+        item = item[0]
+
+    if not isinstance(item, dict):
+        return {}
+
+    return item
+
 
 @app.route("/")
 def home():
@@ -109,41 +118,99 @@ def summary():
 
 @app.route("/api/history", methods=["GET"])
 def history():
-    mock_data = [
-        {"temp": 20, "pressure": 30, "moment": 150, "stress": 210, "displacement": 0.30},
-        {"temp": 25, "pressure": 30, "moment": 165, "stress": 220, "displacement": 0.35},
-        {"temp": 30, "pressure": 35, "moment": 180, "stress": 235, "displacement": 0.40},
-        {"temp": 35, "pressure": 35, "moment": 200, "stress": 250, "displacement": 0.46},
-        {"temp": 40, "pressure": 40, "moment": 220, "stress": 265, "displacement": 0.55},
-        {"temp": 45, "pressure": 40, "moment": 240, "stress": 280, "displacement": 0.63},
-        {"temp": 50, "pressure": 45, "moment": 260, "stress": 300, "displacement": 0.72},
-        {"temp": 55, "pressure": 45, "moment": 280, "stress": 315, "displacement": 0.80},
-        {"temp": 60, "pressure": 50, "moment": 300, "stress": 330, "displacement": 0.91},
-        {"temp": 65, "pressure": 50, "moment": 320, "stress": 345, "displacement": 1.02}
+    xy_pairs = [
+        {"temperature": 20, "pressure": 30},
+        {"temperature": 25, "pressure": 30},
+        {"temperature": 30, "pressure": 35},
+        {"temperature": 35, "pressure": 35},
+        {"temperature": 40, "pressure": 40},
+        {"temperature": 45, "pressure": 40},
+        {"temperature": 50, "pressure": 45},
+        {"temperature": 55, "pressure": 45},
+        {"temperature": 60, "pressure": 50},
+        {"temperature": 65, "pressure": 50}
     ]
 
-    return jsonify({
-        "count": len(mock_data),
-        "source": "mock",
-        "data": mock_data
-    }), 200
+    payload = {
+        "entity": DEFAULT_ENTITY,
+        "xy_pairs": xy_pairs
+    }
+
+    try:
+        api_response = pipeapi_service.post_thermo_buckling_table(payload)
+
+        normalized_data = []
+
+        for index, item in enumerate(api_response):
+            data = normalize_pipeapi_item(item)
+            pair = xy_pairs[index]
+
+            normalized_data.append({
+                "temp": pair["temperature"],
+                "pressure": pair["pressure"],
+                "moment": data.get("bending_moment__kNm"),
+                "stress": data.get("compressive_stress__MPa"),
+                "displacement": data.get("lateral_displacement__m")
+            })
+
+        return jsonify({
+            "count": len(normalized_data),
+            "source": "pipeapi",
+            "data": normalized_data,
+            "raw_result": api_response
+        }), 200
+
+    except Exception as error:
+        return jsonify({
+            "error": "Erro ao consultar histórico na PipeAPI",
+            "details": str(error)
+        }), 500
 
 @app.route("/api/chart", methods=["GET"])
 def chart():
-    mock_chart = [
-        {"temperature": 30, "value": 180},
-        {"temperature": 40, "value": 210},
-        {"temperature": 50, "value": 250},
-        {"temperature": 60, "value": 290},
-        {"temperature": 70, "value": 320},
-        {"temperature": 80, "value": 350},
-        {"temperature": 90, "value": 380}
+    xy_pairs = [
+        {"temperature": 20, "pressure": 30},
+        {"temperature": 25, "pressure": 30},
+        {"temperature": 30, "pressure": 35},
+        {"temperature": 35, "pressure": 35},
+        {"temperature": 40, "pressure": 40},
+        {"temperature": 45, "pressure": 40},
+        {"temperature": 50, "pressure": 45},
+        {"temperature": 55, "pressure": 45},
+        {"temperature": 60, "pressure": 50},
+        {"temperature": 65, "pressure": 50}
     ]
 
-    return jsonify({
-        "source": "mock",
-        "data": mock_chart
-    }), 200
+    payload = {
+        "entity": DEFAULT_ENTITY,
+        "xy_pairs": xy_pairs
+    }
 
+    try:
+        api_response = pipeapi_service.post_thermo_buckling_table(payload)
+
+        chart_data = []
+
+        for index, item in enumerate(api_response):
+            data = normalize_pipeapi_item(item)
+            pair = xy_pairs[index]
+
+            chart_data.append({
+                "temperature": pair["temperature"],
+                "value": data.get("bending_moment__kNm")
+            })
+
+        return jsonify({
+            "source": "pipeapi",
+            "data": chart_data,
+            "raw_result": api_response
+        }), 200
+
+    except Exception as error:
+        return jsonify({
+            "error": "Erro ao consultar dados do gráfico na PipeAPI",
+            "details": str(error)
+        }), 500
+    
 if __name__ == "__main__":
     app.run(debug=True)
