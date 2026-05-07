@@ -1,10 +1,10 @@
 function HistoryTable({ data }) {
   return (
-    <section className="table-section">
-      <h2>Histórico</h2>
+    <section className="history-section">
+      <div className="history-container">
+        <h2>Histórico</h2>
 
-      <div className="table-wrapper">
-        <table>
+        <table className="history-table">
           <thead>
             <tr>
               <th>Temperatura</th>
@@ -16,30 +16,20 @@ function HistoryTable({ data }) {
           </thead>
 
           <tbody>
-  {data.map((item, index) => (
-    <tr key={index}>
-      <td>
-        {Number(item.temperature).toFixed(0)} °C
-      </td>
+            {data.map((item, index) => (
+              <tr key={index}>
+                <td>{item.temperature}</td>
 
-      <td>
-        {Number(item.pressure).toFixed(0)} bar
-      </td>
+                <td>{item.pressure}</td>
 
-      <td>
-        {Number(item.moment).toFixed(3)} kNm
-      </td>
+                <td>{item.momento}</td>
 
-      <td>
-        {Number(item.stress).toFixed(3)} MPa
-      </td>
+                <td>{item.tensao}</td>
 
-      <td>
-        {Number(item.displacement).toFixed(3)} m
-      </td>
-    </tr>
-  ))}
-</tbody>
+                <td>{item.deslocamento}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </section>

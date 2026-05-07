@@ -11,12 +11,30 @@ class PipeAPIService:
 
     def get_thermo_buckling_summary(self, params):
         url = f"{self.base_url}/app/pipeapi/api/thermo-buckling"
-        response = requests.get(url, params=params, timeout=30)
+
+        response = requests.get(
+            url,
+            params=params,
+            timeout=30
+        )
+
         response.raise_for_status()
+
         return response.json()
 
     def post_thermo_buckling_table(self, payload):
         url = f"{self.base_url}/app/pipeapi/api/thermo-buckling/table"
-        response = requests.post(url, json=payload, timeout=30)
+
+        response = requests.post(
+            url,
+            json=payload,
+            timeout=30
+        )
+
         response.raise_for_status()
-        return response.json()
+
+        # evita erro caso a API não retorne JSON
+        try:
+            return response.json()
+        except:
+            return []

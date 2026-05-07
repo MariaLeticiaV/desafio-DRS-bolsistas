@@ -5,38 +5,46 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 
 function ResultsChart({ data }) {
-  console.log("DATA NO GRÁFICO:", data); 
-
   return (
-    <section className="chart-section">
+    <div className="chart-card">
       <h2>Gráfico de Resultados</h2>
 
       <div className="chart-box">
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={420}>
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="4 4" />
 
             <XAxis dataKey="temperature" />
+
             <YAxis />
 
-            <Tooltip />
+            <Tooltip
+              formatter={(value) =>
+                `${Number(value).toFixed(2)} kNm`
+              }
+              labelFormatter={(label) =>
+                `Temperatura: ${label} °C`
+              }
+            />
+
             <Legend />
 
             <Line
               type="monotone"
               dataKey="value"
-              name="Momento Fletor"
+              stroke="#4a90e2"
               strokeWidth={3}
+              name="Momento Fletor"
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </section>
+    </div>
   );
 }
 
