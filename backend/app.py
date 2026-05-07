@@ -93,13 +93,13 @@ def summary():
             "details": str(error)
         }), 500
 
-@app.route("/api/history", methods=["GET"])
+@app.route("/api/history", methods=["POST"])
 def history():
     return jsonify({
         "data": history_store
     }), 200
 
-@app.route("/api/chart", methods=["GET"])
+@app.route("/api/chart", methods=["POST"])
 def chart():
     try:
         temperature = request.args.get("temperature", type=float)
