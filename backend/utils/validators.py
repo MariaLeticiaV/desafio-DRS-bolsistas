@@ -1,14 +1,22 @@
 def validate_temperature(value):
-    if value is None:
-        return "Temperatura é obrigatória"
-    if not (20 <= value <= 90):
-        return "Temperatura deve estar entre 20 e 90"
+    try:
+        value = float(value)
+    except:
+        return "Temperatura inválida"
+
+    if not (20 <= value <= 70):
+        return "Temperatura deve estar entre 20 e 70"
+
     return None
 
 
 def validate_pressure(value):
-    if value is None:
-        return "Pressão é obrigatória"
+    try:
+        value = float(value)
+    except:
+        return "Pressão inválida"
+
     if not (20 <= value <= 62):
         return "Pressão deve estar entre 20 e 62"
+
     return None

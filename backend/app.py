@@ -5,7 +5,10 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
 pipeapi_service = PipeAPIService()
+
+history_store = []
 
 DEFAULT_ENTITY = {
     "di": 139.7,
@@ -21,15 +24,11 @@ DEFAULT_ENTITY = {
     "de_rating": 70
 }
 
+
 def normalize_pipeapi_item(item):
     if isinstance(item, list) and len(item) > 0:
         item = item[0]
-
-    if not isinstance(item, dict):
-        return {}
-
-    return item
-
+    return item if isinstance(item, dict) else {}
 
 @app.route("/")
 def home():
@@ -40,177 +39,109 @@ def home():
 def health():
     return {"status": "ok"}
 
-
 @app.route("/api/summary", methods=["POST"])
 def summary():
-    body = request.get_json()
+    try:
+        body = request.get_json()
 
-    if not body:
-        return jsonify({"error": "Body da requisição não enviado"}), 400
+        if not body:
+            return jsonify({"error": "Body não enviado"}), 400
 
-    temperature = body.get("temperature")
-    pressure = body.get("pressure")
+        temperature = float(body.get("temperature"))
+        pressure = float(body.get("pressure"))
 
-    temp_error = validate_temperature(temperature)
-    if temp_error:
-        return jsonify({"error": temp_error}), 400
+        temp_error = validate_temperature(temperature)
+        if temp_error:
+            return jsonify({"error": temp_error}), 400
 
-    pressure_error = validate_pressure(pressure)
-    if pressure_error:
-        return jsonify({"error": pressure_error}), 400
+        pressure_error = validate_pressure(pressure)
+        if pressure_error:
+            return jsonify({"error": pressure_error}), 400
 
-    params = {
-        **DEFAULT_ENTITY,
-        "temperature": temperature,
-        "pressure": pressure
-    }
+        params = {
+            **DEFAULT_ENTITY,
+            "temperature": temperature,
+            "pressure": pressure
+        }
 
-    if not pipeapi_service.is_configured():
+        api_response = pipeapi_service.get_thermo_buckling_summary(params)
+
+        data = api_response[0] if isinstance(api_response, list) else api_response
+
         result = {
+            "temperature": temperature,
+            "pressure": pressure,
+            "moment": data.get("bending_moment__kNm"),
+            "stress": data.get("compressive_stress__MPa"),
+            "displacement": data.get("lateral_displacement__m"),
+            "status": "Estável" if not data.get("warnings") else "Alerta"
+        }
+
+        history_store.insert(0, result)
+
+        return jsonify({
             "input": {
                 "temperature": temperature,
                 "pressure": pressure
             },
-            "result": {
-                "bending_moment__kNm": 290,
-                "compressive_stress__MPa": 315,
-                "lateral_displacement__m": 0.82,
-                "status": "Estável",
-                "source": "mock"
-            }
-        }
-        return jsonify(result), 200
-
-    try:
-        api_response = pipeapi_service.get_thermo_buckling_summary(params)
-
-        data = api_response[0] if isinstance(api_response, list) and len(api_response) > 0 else api_response
-
-        if not isinstance(data, dict):
-            return jsonify({
-                "error": "Formato inesperado da PipeAPI",
-                "raw_result": api_response
-        }), 500
-
-        normalized_result = {
-            "bending_moment__kNm": data.get("bending_moment__kNm"),
-            "compressive_stress__MPa": data.get("compressive_stress__MPa"),
-            "lateral_displacement__m": data.get("lateral_displacement__m"),
-            "status": "Estável" if not data.get("warnings") else "Com alertas",
-            "warnings": data.get("warnings", [])
-        }
-
-        return jsonify({
-            "input": {
-            "temperature": temperature,
-            "pressure": pressure
-        },
-        "result": normalized_result,
-        "source": "pipeapi",
-        "raw_result": api_response
-    }), 200
+            "result": data
+        }), 200
 
     except Exception as error:
         return jsonify({
-            "error": "Erro ao consultar a PipeAPI",
+            "error": "Erro na API",
             "details": str(error)
         }), 500
 
 @app.route("/api/history", methods=["GET"])
 def history():
-    xy_pairs = [
-        {"temperature": 20, "pressure": 30},
-        {"temperature": 25, "pressure": 30},
-        {"temperature": 30, "pressure": 35},
-        {"temperature": 35, "pressure": 35},
-        {"temperature": 40, "pressure": 40},
-        {"temperature": 45, "pressure": 40},
-        {"temperature": 50, "pressure": 45},
-        {"temperature": 55, "pressure": 45},
-        {"temperature": 60, "pressure": 50},
-        {"temperature": 65, "pressure": 50}
-    ]
-
-    payload = {
-        "entity": DEFAULT_ENTITY,
-        "xy_pairs": xy_pairs
-    }
-
-    try:
-        api_response = pipeapi_service.post_thermo_buckling_table(payload)
-
-        normalized_data = []
-
-        for index, item in enumerate(api_response):
-            data = normalize_pipeapi_item(item)
-            pair = xy_pairs[index]
-
-            normalized_data.append({
-                "temp": pair["temperature"],
-                "pressure": pair["pressure"],
-                "moment": data.get("bending_moment__kNm"),
-                "stress": data.get("compressive_stress__MPa"),
-                "displacement": data.get("lateral_displacement__m")
-            })
-
-        return jsonify({
-            "count": len(normalized_data),
-            "source": "pipeapi",
-            "data": normalized_data,
-            "raw_result": api_response
-        }), 200
-
-    except Exception as error:
-        return jsonify({
-            "error": "Erro ao consultar histórico na PipeAPI",
-            "details": str(error)
-        }), 500
+    return jsonify({
+        "data": history_store
+    }), 200
 
 @app.route("/api/chart", methods=["GET"])
 def chart():
-    xy_pairs = [
-        {"temperature": 20, "pressure": 30},
-        {"temperature": 25, "pressure": 30},
-        {"temperature": 30, "pressure": 35},
-        {"temperature": 35, "pressure": 35},
-        {"temperature": 40, "pressure": 40},
-        {"temperature": 45, "pressure": 40},
-        {"temperature": 50, "pressure": 45},
-        {"temperature": 55, "pressure": 45},
-        {"temperature": 60, "pressure": 50},
-        {"temperature": 65, "pressure": 50}
-    ]
-
-    payload = {
-        "entity": DEFAULT_ENTITY,
-        "xy_pairs": xy_pairs
-    }
-
     try:
+        temperature = request.args.get("temperature", type=float)
+        pressure = request.args.get("pressure", type=float)
+
+        if temperature is None or pressure is None:
+            return jsonify({"error": "Parâmetros obrigatórios"}), 400
+
+        temperatures = [
+    t for t in range(
+        int(temperature) - 20,
+        int(temperature) + 21,
+        10
+    )
+    if 20 <= t <= 120
+]
+
+        xy_pairs = [{"temperature": t, "pressure": pressure} for t in temperatures]
+
+        payload = {
+            "entity": DEFAULT_ENTITY,
+            "xy_pairs": xy_pairs
+        }
+
         api_response = pipeapi_service.post_thermo_buckling_table(payload)
 
         chart_data = []
 
-        for index, item in enumerate(api_response):
+        for i, item in enumerate(api_response):
             data = normalize_pipeapi_item(item)
-            pair = xy_pairs[index]
 
             chart_data.append({
-                "temperature": pair["temperature"],
+                "temperature": xy_pairs[i]["temperature"],
                 "value": data.get("bending_moment__kNm")
             })
 
-        return jsonify({
-            "source": "pipeapi",
-            "data": chart_data,
-            "raw_result": api_response
-        }), 200
+        return jsonify({"data": chart_data}), 200
 
     except Exception as error:
         return jsonify({
-            "error": "Erro ao consultar dados do gráfico na PipeAPI",
-            "details": str(error)
+            "error": str(error)
         }), 500
-    
+
 if __name__ == "__main__":
     app.run(debug=True)

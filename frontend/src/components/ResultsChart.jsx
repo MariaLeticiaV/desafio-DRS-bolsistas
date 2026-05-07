@@ -6,9 +6,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 
 function ResultsChart({ data }) {
+  console.log("DATA NO GRÁFICO:", data); 
+
   return (
     <section className="chart-section">
       <h2>Gráfico de Resultados</h2>
@@ -17,10 +20,19 @@ function ResultsChart({ data }) {
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
+
             <XAxis dataKey="temperature" />
             <YAxis />
+
             <Tooltip />
-            <Line type="monotone" dataKey="value" strokeWidth={3} />
+            <Legend />
+
+            <Line
+              type="monotone"
+              dataKey="value"
+              name="Momento Fletor"
+              strokeWidth={3}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

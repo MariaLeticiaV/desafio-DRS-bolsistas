@@ -1,7 +1,7 @@
 const BASE_URL = "http://127.0.0.1:5000";
 
 export async function fetchSummary(temperature, pressure) {
-  const response = await fetch(`${BASE_URL}/api/summary`, {
+  const res = await fetch(`${BASE_URL}/api/summary`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -9,30 +9,29 @@ export async function fetchSummary(temperature, pressure) {
     body: JSON.stringify({ temperature, pressure }),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Erro ao buscar summary");
-  }
+  const data = await res.json();
 
-  return response.json();
+  if (!res.ok) throw new Error(data.error);
+
+  return data;
+}
+
+export async function fetchChart(temp, pressure) {
+  const res = await fetch(
+    `${BASE_URL}/api/chart?temperature=${temp}&pressure=${pressure}`
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.error);
+
+  return data.data;
 }
 
 export async function fetchHistory() {
-  const response = await fetch(`${BASE_URL}/api/history`);
+  const res = await fetch(`${BASE_URL}/api/history`);
 
-  if (!response.ok) {
-    throw new Error("Erro ao buscar histórico");
-  }
+  const data = await res.json();
 
-  return response.json();
-}
-
-export async function fetchChart() {
-  const response = await fetch(`${BASE_URL}/api/chart`);
-
-  if (!response.ok) {
-    throw new Error("Erro ao buscar gráfico");
-  }
-
-  return response.json();
+  return data.data;
 }

@@ -1,31 +1,72 @@
 function ResultCard({ result, pressure }) {
   return (
-    <section className="card result-card">
+    <section className="card">
       <h2>Resultado da Simulação</h2>
 
-      <div className="result-row">
-        <span>Momento fletor:</span>
-        <strong>{result?.bending_moment__kNm ?? "-"}</strong>
-      </div>
+      <div className="result-grid">
 
-      <div className="result-row">
-        <span>Pressão:</span>
-        <strong>{pressure || "-"}</strong>
-      </div>
+        <div className="result-box">
+          <span className="label">
+            Momento fletor
+          </span>
 
-      <div className="result-row">
-        <span>Tensão comp.:</span>
-        <strong>{result?.compressive_stress__MPa ?? "-"}</strong>
-      </div>
+          <span className="value">
+            {result?.bending_moment__kNm
+              ? `${Number(
+                  result.bending_moment__kNm
+                ).toFixed(2)} kNm`
+              : "- kNm"}
+          </span>
+        </div>
 
-      <div className="result-row">
-        <span>Deslocamento:</span>
-        <strong>{result?.lateral_displacement__m ?? "-"}</strong>
-      </div>
+        <div className="result-box">
+          <span className="label">
+            Pressão
+          </span>
 
-      <div className="result-row">
-        <span>Status:</span>
-        <strong>{result?.status ?? "-"}</strong>
+          <span className="value">
+            {pressure || "-"}
+          </span>
+        </div>
+
+        <div className="result-box">
+          <span className="label">
+            Tensão
+          </span>
+
+          <span className="value">
+            {result?.compressive_stress__MPa
+              ? `${Number(
+                  result.compressive_stress__MPa
+                ).toFixed(2)} MPa`
+              : "- MPa"}
+          </span>
+        </div>
+
+        <div className="result-box">
+          <span className="label">
+            Deslocamento
+          </span>
+
+          <span className="value">
+            {result?.lateral_displacement__m
+              ? `${Number(
+                  result.lateral_displacement__m
+                ).toFixed(2)} m`
+              : "- m"}
+          </span>
+        </div>
+
+        <div className="result-box status">
+          <span className="label">
+            Status
+          </span>
+
+          <span className="value">
+            Estável
+          </span>
+        </div>
+
       </div>
     </section>
   );
