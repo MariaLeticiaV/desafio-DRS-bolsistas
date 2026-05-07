@@ -11,7 +11,7 @@ function InputCard({
 
   const tempInvalid =
     temp !== "" &&
-    (tempNumber < 20 || tempNumber > 120);
+    (tempNumber < 20 || tempNumber > 70);
 
   const pressureInvalid =
     pressure !== "" &&

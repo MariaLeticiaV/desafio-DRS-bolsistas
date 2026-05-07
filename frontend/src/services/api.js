@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:5000";
+const BASE_URL = "https://pipeapi-backend.onrender.com/";
 
 export async function fetchSummary(temperature, pressure) {
   const res = await fetch(`${BASE_URL}/api/summary`, {
