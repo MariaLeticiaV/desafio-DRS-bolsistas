@@ -6,11 +6,11 @@ Este projeto consiste em um dashboard web interativo para simulação e visualiz
 
 A aplicação permite:
 
-* Inserção de parâmetros de entrada
-* Geração de análises estruturais
-* Visualização gráfica dos resultados
-* Histórico das últimas simulações
-* Integração com API real
+- Inserção de parâmetros de entrada
+- Geração de análises estruturais
+- Visualização gráfica dos resultados
+- Histórico das últimas simulações
+- Integração com API real hospedada no Render
 
 ---
 
@@ -18,17 +18,18 @@ A aplicação permite:
 
 ## Frontend
 
-* React
-* Vite
-* Recharts
-* CSS3
+- React
+- Vite
+- Recharts
+- CSS3
 
 ## Backend
 
-* Flask
-* Python
-* Requests
-* Flask-CORS
+- Flask
+- Python
+- Requests
+- Flask-CORS
+- Gunicorn
 
 ---
 
@@ -38,15 +39,15 @@ A aplicação permite:
 
 O usuário pode informar:
 
-* Temperatura
-* Pressão
+- Temperatura
+- Pressão
 
 E gerar:
 
-* Momento fletor
-* Tensão compressiva
-* Deslocamento lateral
-* Status da análise
+- Momento fletor
+- Tensão compressiva
+- Deslocamento lateral
+- Status da análise
 
 ---
 
@@ -54,9 +55,9 @@ E gerar:
 
 O dashboard apresenta um gráfico responsivo com:
 
-* Temperatura no eixo X
-* Momento Fletor no eixo Y
-* Legendas e tooltips interativos
+- Temperatura no eixo X
+- Momento Fletor no eixo Y
+- Legendas e tooltips interativos
 
 ---
 
@@ -64,16 +65,17 @@ O dashboard apresenta um gráfico responsivo com:
 
 O sistema mantém um histórico das últimas análises realizadas:
 
-* Ordenação da mais recente para a mais antiga
-* Exibição limitada aos últimos 5 registros
-* Valores formatados e com unidades de medida
+- Ordenação da mais recente para a mais antiga
+- Exibição limitada aos últimos 5 registros
+- Valores formatados com 4 casas decimais
+- Exibição das unidades de medida
 
 ---
 
 # 🖥️ Estrutura do Projeto
 
 ```bash
-project-root/
+desafio-DRS-Bolsistas/
 │
 ├── backend/
 │   ├── services/
@@ -91,42 +93,13 @@ project-root/
 │   ├── package.json
 │   └── vite.config.js
 │
+├── .gitignore
 └── README.md
 ```
 
 ---
 
 # ⚙️ Como Executar o Projeto
-
-## 🔹 Backend
-
-Acesse a pasta backend:
-
-```bash
-cd backend
-```
-
-Ative o ambiente virtual:
-
-### Windows (PowerShell)
-
-```bash
-venv\Scripts\activate
-```
-
-Instale as dependências:
-
-```bash
-pip install -r requirements.txt
-```
-
-Execute o servidor:
-
-```bash
-python app.py
-```
-
----
 
 ## 🔹 Frontend
 
@@ -160,6 +133,18 @@ http://localhost:5173
 
 ---
 
+# ☁️ Backend Hospedado
+
+O backend da aplicação está hospedado no Render e já configurado no frontend. Portanto, não é necessário executar o backend localmente para utilizar o sistema.
+
+URL da API:
+
+```txt
+https://pipeapi-backend.onrender.com
+```
+
+---
+
 # 📡 Endpoints da API
 
 ## POST `/api/summary`
@@ -177,7 +162,7 @@ Responsável pela geração da análise principal.
 
 ---
 
-## GET `/api/chart`
+## POST `/api/chart`
 
 Retorna os dados utilizados no gráfico.
 
@@ -189,6 +174,16 @@ Retorna os dados utilizados no gráfico.
 
 ---
 
-## GET `/api/history`
+## POST `/api/history`
 
 Retorna o histórico das análises realizadas.
+
+---
+
+# 📌 Observações
+
+- O backend utiliza integração com a PipeAPI.
+- O frontend já está configurado para consumir automaticamente a API hospedada.
+- Não é necessário configurar variáveis `.env` para executar o frontend.
+- O Render pode demorar alguns segundos para responder na primeira requisição devido ao modo gratuito da plataforma.
+
