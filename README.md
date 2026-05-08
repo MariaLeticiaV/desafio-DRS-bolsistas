@@ -178,12 +178,3 @@ Retorna os dados utilizados no gráfico.
 
 Retorna o histórico das análises realizadas.
 
----
-
-# 📌 Observações
-
-- O backend utiliza integração com a PipeAPI.
-- O frontend já está configurado para consumir automaticamente a API hospedada.
-- Não é necessário configurar variáveis `.env` para executar o frontend.
-- O Render pode demorar alguns segundos para responder na primeira requisição devido ao modo gratuito da plataforma.
-
