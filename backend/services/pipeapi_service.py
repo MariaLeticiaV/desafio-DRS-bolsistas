@@ -33,7 +33,6 @@ class PipeAPIService:
 
         response.raise_for_status()
 
-        # evita erro caso a API não retorne JSON
         try:
             return response.json()
         except:
